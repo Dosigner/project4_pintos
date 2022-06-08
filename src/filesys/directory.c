@@ -5,6 +5,7 @@
 #include "filesys/filesys.h"
 #include "filesys/inode.h"
 #include "threads/malloc.h"
+#include "filesys/inode.h"
 
 /* A directory. */
 struct dir 
@@ -26,7 +27,8 @@ struct dir_entry
 bool
 dir_create (block_sector_t sector, size_t entry_cnt)
 {
-  return inode_create (sector, entry_cnt * sizeof (struct dir_entry));
+  // entry_cnt 갯수만큼 SECTOR에 directory를 만듬
+  return inode_create (sector, entry_cnt * sizeof (struct dir_entry), 1);
 }
 
 /* Opens and returns the directory for the given INODE, of which
@@ -34,6 +36,7 @@ dir_create (block_sector_t sector, size_t entry_cnt)
 struct dir *
 dir_open (struct inode *inode) 
 {
+  // dir 자료구조를 메모리에 할당 후, inode 포인팅과 offset 설정
   struct dir *dir = calloc (1, sizeof *dir);
   if (inode != NULL && dir != NULL)
     {
@@ -92,6 +95,8 @@ static bool
 lookup (const struct dir *dir, const char *name,
         struct dir_entry *ep, off_t *ofsp) 
 {
+  // dir에 주어진 name을 검색
+  // 검색된 dir entry주소를 ep 인자로 반환
   struct dir_entry e;
   size_t ofs;
   
@@ -119,13 +124,15 @@ bool
 dir_lookup (const struct dir *dir, const char *name,
             struct inode **inode) 
 {
+  // directory entry에서 file을 검색하여, inode를 open하고 성공 여부 return
   struct dir_entry e;
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
-  if (lookup (dir, name, &e, NULL))
-    *inode = inode_open (e.inode_sector);
+  // dir entry를 disk에서 읽어 name을 검색 후, 해당 entry를 e에 저장
+  if (lookup (dir, name, &e, NULL)) 
+    *inode = inode_open (e.inode_sector); // dir에 주어진 파일명이 존재한 sector
   else
     *inode = NULL;
 
@@ -163,6 +170,7 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
      inode_read_at() will only return a short read at end of file.
      Otherwise, we'd need to verify that we didn't get a short
      read due to something intermittent such as low memory. */
+  // 사용 중이지 않은 directory entry 검색
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) 
     if (!e.in_use)

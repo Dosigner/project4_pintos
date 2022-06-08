@@ -3,7 +3,7 @@
 #include <debug.h>
 #include <string.h>
 
-#define BUFFER_CACHE_ENTRY_NB 64;
+#define BUFFER_CACHE_ENTRY_NB 64
 
 // data를 제외한, cache 스스로에 대한 정보 buffer head table
 static struct buffer_head bh_table[BUFFER_CACHE_ENTRY_NB];

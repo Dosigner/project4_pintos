@@ -15,6 +15,8 @@
 #include "userprog/process.h"
 #endif
 
+#include "filesys/directory.h"
+
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -98,6 +100,8 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+  
+  initial_thread->current_dir = NULL;
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -182,6 +186,13 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority); /* thread struct initialize */
   tid = t->tid = allocate_tid ();  /* thread id allocate */
+
+  if(thread_current()->current_dir != NULL){
+     // 자식 thread의 current dir를 부모 thread의 current dir로 directory를 다시 오픈하여 설정
+    t->current_dir = dir_reopen(thread_current()->current_dir); 
+  }
+  else 
+    t->current_dir = NULL;
 
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf); /* allocate kernel stack */

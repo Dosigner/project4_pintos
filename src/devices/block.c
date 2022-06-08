@@ -54,7 +54,7 @@ struct block *
 block_get_role (enum block_type role)
 {
   ASSERT (role < BLOCK_ROLE_CNT);
-  return block_by_role[role];
+  return block_by_role[role]; // block 자료구조의 메모리 주소를 가리키는 배열
 }
 
 /* Assigns BLOCK the given ROLE. */

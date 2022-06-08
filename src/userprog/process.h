@@ -12,4 +12,10 @@ void process_activate (void);
 void argument_stack(char* argv[], int argc, void **esp);
 /* ++++++++++++++++++++++++++++++ */
 
+///////////////////////////////////////
+int process_add_file(struct file *);
+struct file *process_get_file(int);
+void process_close_file(int);
+
+
 #endif /* userprog/process.h */

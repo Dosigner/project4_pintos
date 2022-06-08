@@ -4,6 +4,8 @@
         "block.h": "c",
         "filesys.h": "c",
         "*.inc": "c",
-        "synch.h": "c"
+        "synch.h": "c",
+        "loader.h": "c",
+        "stdbool.h": "c"
     }
 }

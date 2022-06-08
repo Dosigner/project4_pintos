@@ -16,6 +16,14 @@ enum thread_status
     THREAD_DYING        /* About to be destroyed. */
   };
 
+/* A directory. */
+// thread 가 작업중인 dir의 정보를 저장하도록 변수 추가
+struct dir 
+  {
+    struct inode *inode;                /* Backing store. */
+    off_t pos;                          /* Current position. */
+  };
+
 /* Thread identifier type.
    You can redefine this to whatever type you like. */
 typedef int tid_t;
@@ -118,6 +126,9 @@ struct thread
     void *sig_list[3];
     int next_fd;
 #endif
+
+   // Project 4 directory
+   struct dir * current_dir;
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */

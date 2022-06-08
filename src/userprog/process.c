@@ -217,6 +217,13 @@ process_exit (void)
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
+
+  // thread의 현재 작업 directory의 directory 정보를 memory에서 해지
+  // 이게 있으면 persistence가 안됨
+  /*if(cur->current_dir)
+    dir_close(cur->current_dir);*/
+
+
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
@@ -233,7 +240,7 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
-  // memory leak << ************** HAVE TO! *****************
+  // memory leak
   if (thread_current()->parent_thread != NULL) 
     sema_up(&thread_current()->sema_for_wait);
   
@@ -659,4 +666,41 @@ void argument_stack(char* argv[], int argc, void **esp){
   /* 6. fake address(0) saved*/
   *esp = *esp - 4;
   memset(*esp, 0, sizeof(void *));
+}
+
+/* ++++ Project 3.2 Memory Mapped file +++++ */
+// Return the address of a file object by
+// searching the fd list of process
+struct file *
+process_get_file(int fd) {
+  struct thread *cur = thread_current();
+
+  for (int i = 2; i < cur->next_fd ; i++) {
+    if (i == fd){
+      return cur->fdt[fd]; // struct file
+    }
+  }
+  return NULL;
+}
+/* ++++++++++++++++++++++++++++++++ */
+
+void 
+process_close_file(int fd)
+{
+  struct thread *cur = thread_current();
+  file_close(cur->fdt[fd]);
+  cur->fdt[fd] = NULL;
+}
+
+int 
+process_add_file (struct file *f)
+{
+  struct thread *cur;
+  int fd;
+  if(f == NULL)
+    return -1;
+  cur = thread_current();
+  fd = cur->next_fd++;
+  cur->fdt[fd] = f;
+  return fd;
 }
